@@ -50,7 +50,66 @@ function createBox(item) {
   var image = item.image,
       text = item.text;
   box.classList.add('box');
-  box.innerHTML = "\n        <img src=\"".concat(image, "\" alt=\"").concat(text, "\" />\n        <p class=\"info\">").concat(text, "</p>\n    "); // @todo - speak event
+  box.innerHTML = "\n        <img src=\"".concat(image, "\" alt=\"").concat(text, "\" />\n        <p class=\"info\">").concat(text, "</p>\n    ");
+  box.addEventListener('click', function () {
+    setTextMessage(text);
+    speakText(); // Add active effect
 
+    box.classList.add('active');
+    setTimeout(function () {
+      return box.classList.remove('active');
+    }, 800);
+  });
   main.appendChild(box);
-}
+} // Init speech synth
+
+
+var message = new SpeechSynthesisUtterance(); // Store voices
+
+var voices = [];
+
+function getVoices() {
+  voices = speechSynthesis.getVoices();
+  voices.forEach(function (voice) {
+    var option = document.createElement('option');
+    option.value = voice.name;
+    option.innerText = "".concat(voice.name, " ").concat(voice.lang);
+    voicesSelect.appendChild(option);
+  });
+} // Set text
+
+
+function setTextMessage(text) {
+  message.text = text;
+} // Speak text
+
+
+function speakText() {
+  speechSynthesis.speak(message);
+} //Set voice
+
+
+function setVoice(e) {
+  message.voice = voices.find(function (voice) {
+    return voice.name === e.target.value;
+  });
+} // Voices changed
+
+
+speechSynthesis.addEventListener('voiceschanged', getVoices); // Toggle text box
+
+toggleBtn.addEventListener('click', function () {
+  return document.getElementById('text-box').classList.toggle('show');
+}); // Close button
+
+closeBtn.addEventListener('click', function () {
+  return document.getElementById('text-box').classList.remove('show');
+}); // Change voice
+
+voicesSelect.addEventListener('change', setVoice); // Read text button
+
+readBtn.addEventListener('click', function () {
+  setTextMessage(textarea.value);
+  speakText();
+});
+getVoices();
